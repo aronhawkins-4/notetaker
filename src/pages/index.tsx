@@ -39,14 +39,14 @@ const Content: React.FC = () => {
         {
             enabled: sessionData?.user !== undefined,
             onSuccess: (data) => {
-                setSelectedTopic(selectedTopic ?? data[0] ?? null);
+                void setSelectedTopic(selectedTopic ?? data[0] ?? null);
             },
         }
     );
 
     const createTopic = api.topic.create.useMutation({
         onSuccess: () => {
-            refetchTopics();
+            void refetchTopics();
         },
     });
 
@@ -61,13 +61,13 @@ const Content: React.FC = () => {
 
     const createNote = api.note.create.useMutation({
         onSuccess: () => {
-            refetchNotes();
+            void refetchNotes();
         },
     });
 
     const deleteNote = api.note.delete.useMutation({
         onSuccess: () => {
-            refetchNotes();
+            void refetchNotes();
         },
     });
 
