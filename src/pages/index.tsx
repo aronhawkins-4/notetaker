@@ -5,6 +5,8 @@ import { api, type RouterOutputs } from "@/utils/api";
 import { Header } from "@/components/Header";
 import Link from "next/link";
 import { useState } from "react";
+import { NoteEditor } from "@/components/NoteEditor";
+import { NoteCard } from "@/components/NoteCard";
 
 const Home: NextPage = () => {
     return (
@@ -48,6 +50,27 @@ const Content: React.FC = () => {
         },
     });
 
+    const { data: notes, refetch: refetchNotes } = api.note.getAll.useQuery(
+        {
+            topicId: selectedTopic?.id ?? "",
+        },
+        {
+            enabled: sessionData?.user !== undefined && selectedTopic !== null,
+        }
+    );
+
+    const createNote = api.note.create.useMutation({
+        onSuccess: () => {
+            refetchNotes();
+        },
+    });
+
+    const deleteNote = api.note.delete.useMutation({
+        onSuccess: () => {
+            refetchNotes();
+        },
+    });
+
     return (
         <div className="grid grid-cols-4 gap-2 px-5 pt-5">
             <div className="px-2">
@@ -80,7 +103,34 @@ const Content: React.FC = () => {
                     ))}
                 </ul>
             </div>
-            <div className="col-span-3"></div>
+            <div className="col-span-3">
+                <NoteEditor
+                    onSave={({ title, content }) => {
+                        createNote.mutate({
+                            title,
+                            content,
+                            topicId: selectedTopic?.id ?? "",
+                        });
+                    }}
+                />
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                    {notes?.map((note) => {
+                        return (
+                            <div
+                                key={note.id}
+                                className="h-full"
+                            >
+                                <NoteCard
+                                    note={note}
+                                    onDelete={() =>
+                                        deleteNote.mutate({ id: note.id })
+                                    }
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 };
